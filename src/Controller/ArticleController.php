@@ -132,14 +132,14 @@ class ArticleController extends FOSRestController
      */
     public function deleteArticleAction(Article $article)
     {
-         if ( $this->getUser()->getId() === $article->getUserId()->getId() || in_array("ROLE_ADMIN", $this->getUser()->getRoles()) ) {
+         if ( $this->getUser()->getId() === $article->getUserId() || in_array("ROLE_ADMIN", $this->getUser()->getRoles()) ) {
 
                     $this->em->remove($article);
                     $this->em->flush();
                     return $this->view($article);
          }
          else {
-             return $this->view($article);
+             return $this->view( "FORBIDDEN!" );
          }
     }
 
