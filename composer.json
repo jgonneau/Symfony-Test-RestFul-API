@@ -24,8 +24,10 @@
         "hautelook/alice-bundle": "^2.0",
         "nelmio/api-doc-bundle": "^3.2",
         "symfony/asset": "^4.1",
+        "symfony/browser-kit": "^4.1",
         "symfony/dotenv": "^4.1",
         "symfony/maker-bundle": "^1.6",
+        "symfony/phpunit-bridge": "^4.1",
         "symfony/profiler-pack": "^1.0"
     },
     "config": {
