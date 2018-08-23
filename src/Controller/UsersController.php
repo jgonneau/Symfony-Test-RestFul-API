@@ -11,8 +11,10 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-
 use FOS\RestBundle\Controller\Annotations as Rest;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\ConstraintViolationList;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class UsersController extends FOSRestController
 {
@@ -31,26 +33,47 @@ class UsersController extends FOSRestController
      */
     public function getUsersAction ()
     {
-        $users = $this->userRepository->findAll();
-        return $this->view($users);
-    }
-
-    public function getUserAction(User $user)
-    {
-        return $this->view($user);
+        if ($this->getUser()->getApiKey()) {
+            $users = $this->userRepository->findAll();
+            return $this->view($users);
+        }
+        else {
+            return $this->view('FORBIDDEN');
+        }
     }
 
     /**
+     * @Rest\View(serializerGroups={"user"})
+     *
+     */
+    public function getUserAction(User $user)
+    {
+        if ($this->getUser()->getApiKey()) {
+            return $this->view($user);
+        }
+    }
+
+    /**
+     * @Rest\View(serializerGroups={"user"})
      * @Rest\Post("/users")
      * @ParamConverter("user", converter="fos_rest.request_body")
      */
-    public function postUsersAction(User $user)
+    public function postUsersAction(User $user, ValidatorInterface $validator)
     {
+
+        /** @var ConstraintViolationList $validationErrors */
+        $validationErrors = $validator->validate($user);
+        foreach ($validationErrors as $constraintViolation){
+                // Your code here
+        }
         $this->em->persist($user);
         $this->em->flush();
         return $this->view($user);
     }
 
+    /**
+     * @Rest\View(serializerGroups={"user"})
+     */
     public function putUserAction(Request $request, int $id)
     {
         $user_data = $this->userRepository->find($id);
@@ -76,8 +99,13 @@ class UsersController extends FOSRestController
         return $this->view($user_data);
     }
 
+    /**
+     * @Rest\View(serializerGroups={"user"})
+     */
     public function deleteUserAction(User $user)
     {
-        $this->em->detach($user);
+        $this->em->remove($user);
+        $this->em->flush();
+        return $this->view($user);
     }
 }
